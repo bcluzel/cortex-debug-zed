@@ -1,0 +1,10 @@
+id = "cortex-debug-zed"
+name = "cortex-debug-zed"
+version = "0.0.1"
+schema_version = 1
+authors = ["Baptiste CLUZEL <baptiste.clu@gmail.com>"]
+description = "Debugger for embedded systems, using under the hood the cortex-debug vscode implementation"
+repository = "https://github.com/bcluzel/cortex-debug-zed"
+
+[debug_adapters.cortex-debug-zed]
+# Schema is taken from the default location in debug_adapter_schemas/cortex-debug-zed.json

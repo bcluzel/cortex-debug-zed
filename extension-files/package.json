@@ -1,0 +1,24 @@
+{
+  "name": "cortex-debug-dap-server",
+  "version": "0.1.0",
+  "description": "Cortex-Debug DAP Server bundle for Zed extension",
+  "main": "dap-server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bcluzel/cortex-debug-zed"
+  },
+  "license": "MIT",
+  "keywords": [
+    "debug",
+    "debugger",
+    "dap",
+    "cortex-m",
+    "embedded",
+    "arm",
+    "gdb"
+  ]
+}
