@@ -1,0 +1,50 @@
+diff --git a/src/backend/server.ts b/src/backend/server.ts
+index c3cc72e..36e15ae 100644
+--- a/src/backend/server.ts
++++ b/src/backend/server.ts
+@@ -61,7 +61,11 @@ export class GDBServer extends EventEmitter {
+                 this.initResolve = resolve;
+                 this.initReject = reject;
+                 try {
+-                    await this.connectToConsole();
++                    if (this.consolePort) {
++                        await this.connectToConsole();
++                    } else {
++                        ServerConsoleLog('GDBServer: No console port configured, skipping console connection');
++                    }
+                 } catch (e) {
+                     ServerConsoleLog('GDBServer: Could not connect to console: ' + e);
+                     reject(e);
+@@ -243,8 +247,9 @@ export class GDBServer extends EventEmitter {
+         if (this.consoleSocket) {
+             this.consoleSocket.write(data);
+         } else {
+-            // This can happen if the socket is already closed (extension quit while in a debug session)
+-            console.error('sendToConsole: console not open. How did this happen?');
++            // No VS Code console proxy — forward output as an event so the debug adapter
++            // can display it in the DAP output channel (e.g. Zed debug console).
++            this.emit('output', typeof data === 'string' ? data : data.toString('utf8'));
+         }
+     }
+ 
+diff --git a/src/gdb.ts b/src/gdb.ts
+index 69a5ce0..5264ec4 100755
+--- a/src/gdb.ts
++++ b/src/gdb.ts
+@@ -702,11 +702,14 @@ export class GDBDebugSession extends LoggingDebugSession {
+                         initMatch = new RegExp(this.args.overrideGDBServerStartedRegex, 'i');
+                     }
+                     if (consolePort === undefined) {
+-                        this.launchErrorResponse(response, 107, 'GDB Server Console tcp port is undefined.');
+-                        return doResolve();
++                        // No VS Code GDBServerConsole backend available (running outside VS Code).
++                        // Continue without it — gdb-server output is still captured via stderr.
+                     }
+                 }
+                 this.server = new GDBServer(serverCwd, executable, args, initMatch, gdbPort, consolePort);
++                this.server.on('output', (output) => {
++                    this.handleMsg('stdout', output);
++                });
+                 this.server.on('exit', () => {
+                     if (this.started) {
+                         this.serverQuitEvent();
